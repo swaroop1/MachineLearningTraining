@@ -1,0 +1,80 @@
+The goal of the project is to build a model, which predicts the future returns of the S&P 500 index, based on which a trading will be done.
+The data for this will be previous stock market data.
+new issues faced in this exercise:
+a)Source data from data base 
+b)Handle predictions for time-series data.
+
+Source of data:
+http://www.finance.yahoo.com
+Stock symbol : GSPC
+
+Data type: Multivariate time-series data
+
+R packages used: zoo, xts, lubridate, tseries, quantmod(imp for financial data analysis), TTR, randomForest
+
+imp notes :
+xts() can only have time series data in th form of vectors and matrices, NO data frames.
+
+NOTE : the index/time column in a xts object doesn't have a column name.
+
+Formula :
+
+ the stock values include "Open", "High", "Low", "Close", "Volumes", "Adjusted" for each day.
+
+ Daily Avg Price =  [Ci + Hi + Li] / 3
+
+ Percentage price variations 
+                                 [^Pi+j - ^Ci] / Ci
+
+
+  Feature Selection Process
+
+task of finding the most adequate subset of available input variables for a modeling task.
+The existing approaches to this problem can usually be cast in two groups: (1) feature filters and (2) feature wrappers.
+
+Feature Filters:
+These are independent of the modeling tool that will be used after the feature selection phase. They basically try to use some statistical properties of the features (e.g., correlation) to select the final set of features.
+
+Feature Wrappers:
+The wrapper approaches include the modeling tool in the selection process. They carry out an iterative
+search process where at each step a candidate set of features is tried with the modeling tool and the respective results are recorded. Based on these results, new tentative sets are generated using some search operators, and the process is repeated until some convergence criteria are met that will define the final set.
+
+
+In this case we have identified an initial set of 22 variables :
+They are:
+
+Ri-h = (Ci - Ci-h) / Ci-h; where Ci is the close price at tradinf session i, and we are considering 'h' to vary from 1:10, so this gives us 10 variables.
+
+The other 12 variables are: (These indicators are present in TTR package)
+Avearge True Range (ATR) -- indicator of the volatility of the series
+Stochastic Momentum Index (SMI) -- momemtum indicator
+Welles Wilder Directional Movement Index (ADX)
+Aroon Indicator -- identifies starting trends
+Bollinger Bands -- compare volatility over a period of time
+Chaikin Volatility 
+Close Location Value -- relates session close to trading range
+Arms' Ease Movement Value (EMV)
+MACD Oscillator
+Money Flow Index (MFI)
+Parabolic Stop and Reverse
+Volatility Indicator
+
+These indiactors produce several values, so some post-procesing is carries to consider only a single value from each of them.
+
+From this initial set of 22 variables we choose to reduce the count, by using a feature selection method.
+The technique used is Random Forests, to estimate the importance of variables involved.
+The importance of each variable is found out by, calculating the percentage increase in error of random forest if we remove each variable in turn.
+
+In this project for modelling we use, regression and classification models:
+
+Regression model , where T.indicator is the target variable.
+
+classification model, where a new target variable is introduced, which has three possible values: "Sell", 
+"Hold", "Buy". These values are got from the threshold values of T.indicator
+
+## Evaluation of the classification model: ##############
+Financial markets forecasting is an example of an application driven by rare events. Event-based prediction tasks are usually evaluated by the precision and recall metrics that focus the evaluation on the events, disregarding the performance of the common situations (in our case, the hold signals).
+
+Precision can be informally defined as the proportion of event signals produced by the models that are correct. 
+
+Recall is defined as the proportion of events occurring in the domain that is signaled as such by the models.
